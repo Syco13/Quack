@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quack</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="onboarding" class="onboardingOverlay">
+      <div class="onboardingCard" role="dialog" aria-modal="true" aria-label="Setup">
+        <div id="step0">
+          <h2 class="onboardingHeadline">Welcome to Quack</h2>
+          <div class="onboardingSubtext">Your music gets quiet when you talk.</div>
+          <button class="onboardingBtn" id="toStep1">Get started</button>
+        </div>
+
+        <div id="step1" style="display:none">
+          <h2 class="onboardingHeadline">Select your microphone</h2>
+          <div id="onboardMicContainer"></div>
+          <button class="onboardingBtn" id="toStep2">Next</button>
+        </div>
+
+        <div id="step2" style="display:none">
+          <h2 class="onboardingHeadline">Open Spotify</h2>
+          <div class="onboardingSubtext" id="spotifyOnboardStatus">Start Spotify and play something.</div>
+          <button class="onboardingBtn" id="toStep3" disabled>Waiting for Spotify...</button>
+        </div>
+
+        <div id="step3" style="display:none">
+          <h2 class="onboardingHeadline">You're ready</h2>
+          <div class="onboardingSubtext">Turn on the switch on the main page to activate Quack.</div>
+          <button class="onboardingBtn" id="finishOnboarding">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="app" id="app">
+      <header class="titlebar" aria-label="Title">
+        <div class="brand">Quack</div>
+        <div class="spotify" aria-label="Spotify status">
+          <span class="dot" id="spotifyDot" aria-hidden="true"></span>
+          <span class="spotifyText" id="spotifyText">Spotify not found</span>
+        </div>
+      </header>
+
+      <main class="content" aria-label="Controls">
+        <section class="row">
+          <div class="label">Select your microphone</div>
+          <div id="micContainer"></div>
+        </section>
+
+        <section class="row bigRow toggleCompact">
+          <div class="bigLeft">
+            <div class="bigLabel">Quack active</div>
+            <div class="bigHint">Music gets quiet when you talk</div>
+          </div>
+          <label class="toggle" aria-label="Quack active">
+            <input id="enabledToggle" type="checkbox" />
+            <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+          </label>
+        </section>
+
+        <section class="row">
+          <div class="label">How quiet should the music get?</div>
+          <div class="sliderRow">
+            <button id="duckMinus" class="step" type="button" aria-label="Less quiet">—</button>
+            <input id="duckSlider" class="slider" type="range" min="0" max="100" step="1" value="80" />
+            <span id="duckLabel">80%</span>
+            <button id="duckPlus" class="step" type="button" aria-label="More quiet">+</button>
+          </div>
+        </section>
+
+        <section class="row">
+          <div class="label">How fast should music come back?</div>
+          <div class="sliderRow">
+            <button id="delayMinus" class="step" type="button" aria-label="Faster">—</button>
+            <input id="delaySlider" class="slider" type="range" min="500" max="3000" step="500" value="1500" />
+            <span id="releaseLabel">1500ms</span>
+            <button id="delayPlus" class="step" type="button" aria-label="Slower">+</button>
+          </div>
+        </section>
+
+        <div class="hint" id="hint" aria-live="polite"></div>
+
+        <!-- legacy nodes kept (hidden) so existing renderer.js doesn’t crash -->
+        <div id="duckValue" class="value" aria-label="Value" style="display:none"></div>
+        <div id="releaseValue" class="value" aria-label="Value" style="display:none"></div>
+        <button id="releaseMinus" class="step" type="button" aria-label="Faster" style="display:none">—</button>
+        <input id="releaseSlider" class="slider" type="range" min="0" max="5000" step="100" style="display:none" />
+        <button id="releasePlus" class="step" type="button" aria-label="Slower" style="display:none">+</button>
+      </main>
+    </div>
+
+    <script>
+      // 1. Slider % label
+      const duckSlider = document.getElementById('duckSlider');
+      const duckLabel = document.getElementById('duckLabel');
+      duckSlider.addEventListener('input', () => {
+        duckLabel.textContent = duckSlider.value + '%';
+      });
+
+      const delaySlider = document.getElementById('delaySlider');
+      const releaseSlider = document.getElementById('releaseSlider');
+      const releaseLabel = document.getElementById('releaseLabel');
+
+      function updateDelayLabel() {
+        console.log('delaySlider input value:', delaySlider.value);
+        const ms = Number(delaySlider.value);
+        switch (ms) {
+          case 500:
+            releaseLabel.textContent = 'Instant (0.5s)';
+            break;
+          case 1000:
+            releaseLabel.textContent = 'Fast (1s)';
+            break;
+          case 1500:
+            releaseLabel.textContent = 'Normal (1.5s)';
+            break;
+          case 2000:
+            releaseLabel.textContent = 'Slow (2s)';
+            break;
+          case 2500:
+            releaseLabel.textContent = 'Very slow (2.5s)';
+            break;
+          case 3000:
+            releaseLabel.textContent = 'Maximum (3s)';
+            break;
+          default:
+            releaseLabel.textContent = 'Normal (1.5s)';
+        }
+
+        // keep legacy slider in sync for existing renderer logic
+        releaseSlider.value = delaySlider.value;
+        releaseSlider.dispatchEvent(new Event('input'));
+      }
+
+      delaySlider.addEventListener('input', updateDelayLabel);
+
+      duckLabel.textContent = duckSlider.value + '%';
+      delaySlider.dispatchEvent(new Event('input'));
+
+      // Fix 1: + and — buttons
+      document.getElementById('duckMinus').addEventListener('click', () => {
+        const s = document.getElementById('duckSlider');
+        s.value = Math.max(parseInt(s.value) - 5, parseInt(s.min));
+        s.dispatchEvent(new Event('input'));
+      });
+      document.getElementById('duckPlus').addEventListener('click', () => {
+        const s = document.getElementById('duckSlider');
+        s.value = Math.min(parseInt(s.value) + 5, parseInt(s.max));
+        s.dispatchEvent(new Event('input'));
+      });
+      document.getElementById('delayMinus').addEventListener('click', () => {
+        const s = document.getElementById('delaySlider');
+        s.value = Math.max(parseInt(s.value) - 500, parseInt(s.min));
+        s.dispatchEvent(new Event('input'));
+      });
+      document.getElementById('delayPlus').addEventListener('click', () => {
+        const s = document.getElementById('delaySlider');
+        s.value = Math.min(parseInt(s.value) + 500, parseInt(s.max));
+        s.dispatchEvent(new Event('input'));
+      });
+
+      function buildMicDropdown(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'customSelect';
+        dropdown.setAttribute('aria-label', 'Select microphone');
+
+        const value = document.createElement('div');
+        value.className = 'customSelectValue';
+        value.textContent = 'Microphone';
+
+        const list = document.createElement('div');
+        list.className = 'customSelectList';
+        list.style.display = 'none';
+
+        dropdown.appendChild(value);
+        dropdown.appendChild(list);
+        container.appendChild(dropdown);
+
+        let isOpen = false;
+
+        const close = () => {
+          list.style.display = 'none';
+          isOpen = false;
+        };
+
+        dropdown.addEventListener('click', (e) => {
+          e.stopPropagation();
+          isOpen = !isOpen;
+          list.style.display = isOpen ? 'block' : 'none';
+        });
+
+        document.addEventListener('click', close);
+
+        const cleanLabel = (raw) => {
+          let label = raw || 'Microphone';
+          label = label.replace(/\s*\(([0-9a-f]{4}:?[0-9a-f]{0,8}[a-z0-9]*)\)\s*$/i, '').trim();
+          return label || 'Microphone';
+        };
+
+        const populate = async () => {
+          try {
+            await navigator.mediaDevices.getUserMedia({ audio: true });
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const mics = devices.filter(d => d.kind === 'audioinput');
+
+            list.innerHTML = '';
+            if (mics.length === 0) {
+              value.textContent = 'No microphone found';
+              close();
+              return;
+            }
+
+            // Default selection: first item
+            value.textContent = cleanLabel(mics[0].label);
+
+            mics.forEach((mic) => {
+              const item = document.createElement('div');
+              item.className = 'customSelectItem';
+              item.textContent = cleanLabel(mic.label);
+              item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                value.textContent = item.textContent;
+                close();
+                list.style.display = 'none';
+                isOpen = false;
+              });
+              list.appendChild(item);
+            });
+          } catch {
+            value.textContent = 'Microphone not available';
+            close();
+          }
+        };
+
+        void populate();
+      }
+
+      buildMicDropdown('micContainer');
+      buildMicDropdown('onboardMicContainer');
+
+      function renderSpotify(detected) {
+        const dot = document.getElementById('spotifyDot');
+        const text = document.getElementById('spotifyText');
+        dot.classList.remove('good', 'bad');
+        if (detected) {
+          dot.classList.add('good');
+          text.textContent = 'Spotify running';
+        } else {
+          dot.classList.add('bad');
+          text.textContent = 'Spotify not found';
+        }
+      }
+
+      function setOnboardingStep(step) {
+        const steps = ['step0', 'step1', 'step2', 'step3'];
+        steps.forEach((id, idx) => {
+          document.getElementById(id).style.display = idx === step ? 'block' : 'none';
+        });
+
+        if (step === 2) {
+          // Button state is controlled by the global Spotify poll.
+          const btn = document.getElementById('toStep3');
+          btn.disabled = true;
+          btn.textContent = 'Waiting for Spotify...';
+        }
+      }
+
+      let spotifyDetected = false;
+
+      document.getElementById('toStep1').onclick = () => setOnboardingStep(1);
+      document.getElementById('toStep2').onclick = () => setOnboardingStep(2);
+      document.getElementById('toStep3').onclick = () => setOnboardingStep(3);
+      document.getElementById('finishOnboarding').onclick = () => {
+        localStorage.setItem('onboarded', 'true');
+        document.getElementById('onboarding').style.display = 'none';
+      };
+
+      if (!localStorage.getItem('onboarded')) {
+        document.getElementById('onboarding').style.display = 'flex';
+        setOnboardingStep(0);
+      } else {
+        document.getElementById('onboarding').style.display = 'none';
+      }
+
+      async function pollSpotify() {
+        try {
+          spotifyDetected = await window.duckit.checkSpotify();
+        } catch {
+          spotifyDetected = false;
+        }
+
+        const spotifyFound = spotifyDetected;
+        console.log('[spotify poll] result:', spotifyFound);
+
+        const toStep3Btn = document.getElementById('toStep3');
+        const spotifyOnboardText = document.getElementById('spotifyOnboardStatus');
+        if (toStep3Btn) {
+          toStep3Btn.disabled = !spotifyFound;
+          toStep3Btn.textContent = spotifyFound ? 'Next' : 'Waiting for Spotify...';
+        }
+        if (spotifyOnboardText) {
+          spotifyOnboardText.textContent = spotifyFound ? 'Spotify detected' : 'Start Spotify and play something.';
+          spotifyOnboardText.style.color = spotifyFound ? '#22c55e' : 'rgba(255,255,255,0.7)';
+        }
+
+        renderSpotify(spotifyDetected);
+      }
+
+      void pollSpotify();
+      setInterval(() => {
+        void pollSpotify();
+      }, 2000);
+
+      async function boot() {
+        try {
+          const stored = await window.duckit.getSettings();
+          if (stored.duckLevel === 0 || stored.duckLevel >= 0.99) {
+            await window.duckit.setSettings({ duckLevel: 0.2 });
+          }
+
+          const effective = await window.duckit.getSettings();
+          document.getElementById('enabledToggle').checked = !!effective.enabled;
+
+          const sliderValue = Math.round((1 - (effective.duckLevel ?? 0.2)) * 100);
+          duckSlider.value = sliderValue >= 0 ? String(sliderValue) : '80';
+          duckLabel.textContent = duckSlider.value + '%';
+
+          document.getElementById('delaySlider').value = String(effective.releaseDelayMs ?? 1500);
+          document.getElementById('delaySlider').dispatchEvent(new Event('input'));
+        } catch {
+          // ignore
+        }
+      }
+
+      document.getElementById('enabledToggle').addEventListener('change', async (e) => {
+        const checked = e.target.checked;
+        try { await window.duckit.setSettings({ enabled: checked }); } catch {}
+      });
+
+      document.getElementById('duckSlider').addEventListener('input', async (e) => {
+        const sliderValue = Number(e.target.value);
+        const v = 1 - (sliderValue / 100);
+        try { await window.duckit.setSettings({ duckLevel: v }); } catch {}
+      });
+
+      document.getElementById('releaseSlider').addEventListener('input', async (e) => {
+        const v = Number(e.target.value);
+        try { await window.duckit.setSettings({ releaseDelayMs: v }); } catch {}
+      });
+
+      void boot();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,460 @@
+:root {
+  --bg: #141414;
+  --panel: #1a1a1a;
+  --border: #2a2a2a;
+  --text: #eaeaea;
+  --muted: rgba(255, 255, 255, 0.65);
+  --accent: #7c3aed;
+  --good: #22c55e;
+  --bad: #ef4444;
+
+  font-family: Inter, Geist, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 14px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 420px;
+  height: auto;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+button,
+select,
+input {
+  font-family: inherit;
+}
+
+.app {
+  width: 420px;
+  background: var(--bg);
+  position: relative;
+}
+
+.titlebar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+}
+
+.brand {
+  font-weight: 750;
+  letter-spacing: 0.2px;
+}
+
+.spotify {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-app-region: no-drag;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.dot.good {
+  background: var(--good);
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.dot.bad {
+  background: var(--bad);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.spotifyText {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.content {
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.row {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+/* Fix 4: compact toggle row */
+.toggleCompact {
+  padding: 12px 16px;
+}
+
+.toggleCompact .bigLabel {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.toggleCompact .bigHint {
+  font-size: 11px;
+  color: #888;
+}
+
+.bigRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bigLeft {
+  display: grid;
+  gap: 2px;
+}
+
+.bigLabel {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.bigHint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.label {
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.control {
+  width: 100%;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  outline: none;
+  padding: 0 10px;
+  -webkit-app-region: no-drag;
+}
+
+/* Fix 3: custom dropdown */
+.customSelect {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  background: #1a1a1a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  position: relative;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.customSelectValue {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.customSelectList {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  background: #1a1a1a;
+  overflow: hidden;
+  max-height: 220px;
+  z-index: 20;
+}
+
+.customSelectItem {
+  padding: 10px;
+  color: #fff;
+}
+
+.customSelectItem:hover {
+  background: rgba(124, 58, 237, 0.35);
+}
+
+.control:focus {
+  border-color: rgba(124, 58, 237, 0.55);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+}
+
+/* Toggle */
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.track {
+  width: 86px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+  display: block;
+  position: relative;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(255, 255, 255, 0.86);
+  transition: transform 140ms ease;
+}
+
+.toggle input:checked + .track {
+  background: rgba(124, 58, 237, 0.25);
+  border-color: rgba(124, 58, 237, 0.45);
+}
+
+.toggle input:checked + .track .thumb {
+  transform: translateX(40px);
+}
+
+/* Sliders */
+.sliderRow {
+  display: grid;
+  grid-template-columns: 42px 1fr 64px 42px;
+  align-items: center;
+  gap: 10px;
+}
+
+.step {
+  width: 42px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.step:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+.slider {
+  width: 100%;
+  -webkit-app-region: no-drag;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--accent);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.18);
+}
+
+.value {
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.18);
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+  -webkit-app-region: no-drag;
+}
+
+#duckLabel,
+#releaseLabel {
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.18);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.88);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hint:empty {
+  display: none;
+}
+
+/* Onboarding overlay */
+.onboard {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 50;
+}
+
+.onboard.open {
+  display: flex;
+}
+
+.onboardCard {
+  width: calc(420px - 24px);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(20, 20, 20, 0.96);
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.onboardTitle {
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.onboardText {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.4;
+}
+
+.onboardMic {
+  display: none;
+}
+
+.onboardMic.show {
+  display: block;
+}
+
+.onboardBtn {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 58, 237, 0.45);
+  background: rgba(124, 58, 237, 0.26);
+  color: rgba(255, 255, 255, 0.94);
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+.onboardBtn:hover {
+  background: rgba(124, 58, 237, 0.34);
+}
+
+/* New onboarding overlay (spec-driven) */
+.onboardingOverlay {
+  position: fixed;
+  inset: 0;
+  background: #141414;
+  z-index: 999;
+  padding: 32px;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.onboardingCard {
+  width: 100%;
+  max-width: 340px;
+  padding: 32px;
+  border-radius: 16px;
+  border: 1px solid #2a2a2a;
+  background: #1a1a1a;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.onboardingDots {
+  display: flex;
+  gap: 8px;
+}
+
+.onboardingDot {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.onboardingDot.active {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.onboardingDot.inactive {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.onboardingLogo {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.onboardingHeadline {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.onboardingSubtext {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.35;
+}
+
+.onboardingBtn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(124, 58, 237, 0.55);
+  background: rgba(124, 58, 237, 0.28);
+  color: rgba(255, 255, 255, 0.94);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.onboardingBtn:hover {
+  background: rgba(124, 58, 237, 0.36);
+}
