@@ -3,97 +3,260 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quack</title>
+    <title>Quack | Auto-duck Spotify when you speak (No OBS)</title>
+    <meta
+      name="description"
+      content="Quack is a Windows app that automatically lowers Spotify volume when you speak, then restores it after a configurable delay. No OBS required."
+    />
+    <meta property="og:title" content="Quack | Auto-duck Spotify when you speak" />
+    <meta
+      property="og:description"
+      content="Speak naturally. Quack ducks Spotify automatically with Silero VAD and restores volume after your chosen delay."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://github.com/Syco13/Quack" />
+    <meta property="og:image" content="../assets/icon.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Quack | Auto-duck Spotify when you speak" />
+    <meta
+      name="twitter:description"
+      content="Windows-only. No OBS required. Download Quack v0.1.0 and keep your Spotify levels clean while you talk."
+    />
+    <meta name="twitter:image" content="../assets/icon.png" />
+    <link rel="icon" type="image/png" href="../assets/icon.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skipLink" href="#mainContent">Skip to content</a>
+
     <div id="onboarding" class="onboardingOverlay">
       <div class="onboardingCard" role="dialog" aria-modal="true" aria-label="Setup">
         <div id="step0">
           <h2 class="onboardingHeadline">Welcome to Quack</h2>
-          <div class="onboardingSubtext">Your music gets quiet when you talk.</div>
+          <p class="onboardingSubtext">Your music gets quiet when you talk.</p>
           <button class="onboardingBtn" id="toStep1">Get started</button>
         </div>
 
-        <div id="step1" style="display:none">
+        <div id="step1" style="display: none">
           <h2 class="onboardingHeadline">Select your microphone</h2>
           <div id="onboardMicContainer"></div>
           <button class="onboardingBtn" id="toStep2">Next</button>
         </div>
 
-        <div id="step2" style="display:none">
+        <div id="step2" style="display: none">
           <h2 class="onboardingHeadline">Open Spotify</h2>
-          <div class="onboardingSubtext" id="spotifyOnboardStatus">Start Spotify and play something.</div>
+          <p class="onboardingSubtext" id="spotifyOnboardStatus">Start Spotify and play something.</p>
           <button class="onboardingBtn" id="toStep3" disabled>Waiting for Spotify...</button>
         </div>
 
-        <div id="step3" style="display:none">
+        <div id="step3" style="display: none">
           <h2 class="onboardingHeadline">You're ready</h2>
-          <div class="onboardingSubtext">Turn on the switch on the main page to activate Quack.</div>
+          <p class="onboardingSubtext">Turn on Quack to activate ducking.</p>
           <button class="onboardingBtn" id="finishOnboarding">Done</button>
         </div>
       </div>
     </div>
 
-    <div class="app" id="app">
-      <header class="titlebar" aria-label="Title">
-        <div class="brand">Quack</div>
-        <div class="spotify" aria-label="Spotify status">
-          <span class="dot" id="spotifyDot" aria-hidden="true"></span>
-          <span class="spotifyText" id="spotifyText">Spotify not found</span>
+    <div class="site" id="app">
+      <header class="siteHeader">
+        <div class="brand">
+          <img src="../assets/icon.png" alt="Quack logo" class="brandLogo" />
+          <span>Quack</span>
         </div>
+        <nav aria-label="Primary" class="topNav">
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#download">Download</a>
+          <a href="#faq">FAQ</a>
+        </nav>
       </header>
 
-      <main class="content" aria-label="Controls">
-        <section class="row">
-          <div class="label">Select your microphone</div>
-          <div id="micContainer"></div>
-        </section>
-
-        <section class="row bigRow toggleCompact">
-          <div class="bigLeft">
-            <div class="bigLabel">Quack active</div>
-            <div class="bigHint">Music gets quiet when you talk</div>
-          </div>
-          <label class="toggle" aria-label="Quack active">
-            <input id="enabledToggle" type="checkbox" />
-            <span class="track" aria-hidden="true"><span class="thumb"></span></span>
-          </label>
-        </section>
-
-        <section class="row">
-          <div class="label">How quiet should the music get?</div>
-          <div class="sliderRow">
-            <button id="duckMinus" class="step" type="button" aria-label="Less quiet">—</button>
-            <input id="duckSlider" class="slider" type="range" min="0" max="100" step="1" value="80" />
-            <span id="duckLabel">80%</span>
-            <button id="duckPlus" class="step" type="button" aria-label="More quiet">+</button>
+      <main id="mainContent">
+        <section class="hero" aria-labelledby="heroTitle">
+          <p class="eyebrow">Windows desktop app</p>
+          <h1 id="heroTitle">Speak naturally. Quack ducks Spotify automatically. No OBS required.</h1>
+          <p class="heroText">
+            Quack listens to your microphone with Silero VAD, lowers Spotify via Windows Core Audio,
+            then restores volume after your configured delay.
+          </p>
+          <div class="heroCtas">
+            <a class="btn btnPrimary" href="https://github.com/Syco13/Quack/releases/tag/v0.1.0" target="_blank" rel="noopener noreferrer">Download v0.1.0</a>
+            <a class="btn btnGhost" href="https://github.com/Syco13/Quack" target="_blank" rel="noopener noreferrer">View source</a>
           </div>
         </section>
 
-        <section class="row">
-          <div class="label">How fast should music come back?</div>
-          <div class="sliderRow">
-            <button id="delayMinus" class="step" type="button" aria-label="Faster">—</button>
-            <input id="delaySlider" class="slider" type="range" min="500" max="3000" step="500" value="1500" />
-            <span id="releaseLabel">1500ms</span>
-            <button id="delayPlus" class="step" type="button" aria-label="Slower">+</button>
+        <section class="visual" aria-label="Product visualization">
+          <div class="vizCard">
+            <p class="vizTitle">Live ducking preview</p>
+            <div class="signalRow">
+              <span>Mic activity</span>
+              <div class="wave" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="signalRow">
+              <span>Spotify volume</span>
+              <div class="volume" aria-hidden="true">
+                <span class="volumeBase"></span>
+                <span class="volumeDuck"></span>
+              </div>
+            </div>
+            <p class="vizHint">Detected speech → ducked → restored</p>
           </div>
         </section>
 
-        <div class="hint" id="hint" aria-live="polite"></div>
+        <section class="panel" aria-labelledby="panelTitle">
+          <div class="panelHeader">
+            <h2 id="panelTitle">Control panel</h2>
+            <div class="spotify" aria-label="Spotify status">
+              <span class="dot" id="spotifyDot" aria-hidden="true"></span>
+              <span class="spotifyText" id="spotifyText">Spotify not found</span>
+            </div>
+          </div>
 
-        <!-- legacy nodes kept (hidden) so existing renderer.js doesn’t crash -->
-        <div id="duckValue" class="value" aria-label="Value" style="display:none"></div>
-        <div id="releaseValue" class="value" aria-label="Value" style="display:none"></div>
-        <button id="releaseMinus" class="step" type="button" aria-label="Faster" style="display:none">—</button>
-        <input id="releaseSlider" class="slider" type="range" min="0" max="5000" step="100" style="display:none" />
-        <button id="releasePlus" class="step" type="button" aria-label="Slower" style="display:none">+</button>
+          <div class="gridRow">
+            <div class="label">Microphone</div>
+            <div id="micContainer"></div>
+          </div>
+
+          <div class="gridRow bigRow">
+            <div>
+              <div class="bigLabel">Quack active</div>
+              <div class="bigHint">Enable automatic ducking</div>
+            </div>
+            <label class="toggle" aria-label="Quack active">
+              <input id="enabledToggle" type="checkbox" />
+              <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+            </label>
+          </div>
+
+          <div class="gridRow">
+            <div class="label">How quiet should Spotify get?</div>
+            <div class="sliderRow">
+              <button id="duckMinus" class="step" type="button" aria-label="Less quiet">—</button>
+              <input id="duckSlider" class="slider" type="range" min="0" max="100" step="1" value="80" />
+              <span id="duckLabel">80%</span>
+              <button id="duckPlus" class="step" type="button" aria-label="More quiet">+</button>
+            </div>
+          </div>
+
+          <div class="gridRow">
+            <div class="label">How fast should music come back?</div>
+            <div class="sliderRow">
+              <button id="delayMinus" class="step" type="button" aria-label="Faster">—</button>
+              <input id="delaySlider" class="slider" type="range" min="500" max="3000" step="500" value="1500" />
+              <span id="releaseLabel">1500ms</span>
+              <button id="delayPlus" class="step" type="button" aria-label="Slower">+</button>
+            </div>
+          </div>
+
+          <div class="hint" id="hint" aria-live="polite"></div>
+
+          <div id="duckValue" class="value" style="display: none"></div>
+          <div id="releaseValue" class="value" style="display: none"></div>
+          <button id="releaseMinus" class="step" type="button" style="display: none">—</button>
+          <input id="releaseSlider" class="slider" type="range" min="0" max="5000" step="100" style="display: none" />
+          <button id="releasePlus" class="step" type="button" style="display: none">+</button>
+        </section>
+
+        <section id="features" class="contentSection" aria-labelledby="featuresTitle">
+          <h2 id="featuresTitle">Features</h2>
+          <div class="featureGrid">
+            <article>
+              <h3>Speech-aware ducking</h3>
+              <p>Silero VAD detects when you speak and triggers ducking automatically.</p>
+            </article>
+            <article>
+              <h3>Spotify session control</h3>
+              <p>Targets Spotify’s app-session volume using Windows Core Audio.</p>
+            </article>
+            <article>
+              <h3>Configurable feel</h3>
+              <p>Set your duck level and release delay to match your setup.</p>
+            </article>
+            <article>
+              <h3>Tray-first workflow</h3>
+              <p>Runs from the tray and stays out of your way while you work or game.</p>
+            </article>
+            <article>
+              <h3>Windows-first</h3>
+              <p>Built for Windows 10/11 and tuned for local desktop reliability.</p>
+            </article>
+            <article>
+              <h3>Private + open source</h3>
+              <p>Runs locally on your machine, with source available under MIT.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="how" class="contentSection" aria-labelledby="howTitle">
+          <h2 id="howTitle">How it works</h2>
+          <ol class="steps">
+            <li><strong>Listen:</strong> Quack monitors your selected microphone.</li>
+            <li><strong>Duck:</strong> When speech is detected, Spotify volume is lowered.</li>
+            <li><strong>Restore:</strong> Volume returns after your configured release delay.</li>
+          </ol>
+        </section>
+
+        <section class="contentSection" aria-labelledby="compatTitle">
+          <h2 id="compatTitle">Requirements & compatibility</h2>
+          <ul class="checks">
+            <li>Windows 10 or Windows 11</li>
+            <li>Spotify (Free or Premium)</li>
+            <li>A working microphone</li>
+            <li>Currently Windows-only</li>
+          </ul>
+        </section>
+
+        <section id="download" class="contentSection" aria-labelledby="downloadTitle">
+          <h2 id="downloadTitle">Download</h2>
+          <p>
+            Quack v0.1.0 is available now. Download from the release page or directly grab
+            <a href="https://github.com/Syco13/Quack/releases/download/v0.1.0/Quack.1.0.0.exe" target="_blank" rel="noopener noreferrer">Quack.1.0.0.exe</a>.
+          </p>
+          <p class="note">First launch can take around 10–30 seconds while Windows unpacks the app.</p>
+          <div class="heroCtas">
+            <a class="btn btnPrimary" href="https://github.com/Syco13/Quack/releases/tag/v0.1.0" target="_blank" rel="noopener noreferrer">Open release</a>
+            <a class="btn btnGhost" href="https://github.com/Syco13/Quack/releases/download/v0.1.0/Quack.1.0.0.exe" target="_blank" rel="noopener noreferrer">Direct .exe</a>
+          </div>
+        </section>
+
+        <section id="faq" class="contentSection" aria-labelledby="faqTitle">
+          <h2 id="faqTitle">FAQ</h2>
+          <div class="faq">
+            <details>
+              <summary>Do I need OBS?</summary>
+              <p>No. Quack is a standalone Windows desktop app.</p>
+            </details>
+            <details>
+              <summary>Does it work with Spotify Free and Premium?</summary>
+              <p>Yes, as long as Spotify is running on Windows.</p>
+            </details>
+            <details>
+              <summary>Does Quack send my microphone data anywhere?</summary>
+              <p>No cloud requirement is documented. Quack operates locally on your machine.</p>
+            </details>
+            <details>
+              <summary>Why can first launch feel slow?</summary>
+              <p>Windows may take 10–30 seconds on first run while unpacking the installed app.</p>
+            </details>
+            <details>
+              <summary>What operating systems are supported?</summary>
+              <p>Windows 10 and Windows 11 only for now.</p>
+            </details>
+          </div>
+        </section>
       </main>
+
+      <footer class="siteFooter">
+        <a href="#mainContent">Top</a>
+        <a href="https://github.com/Syco13/Quack" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/Syco13/Quack/releases/tag/v0.1.0" target="_blank" rel="noopener noreferrer">Releases</a>
+        <span>MIT License</span>
+      </footer>
     </div>
 
     <script>
-      // 1. Slider % label
       const duckSlider = document.getElementById('duckSlider');
       const duckLabel = document.getElementById('duckLabel');
       duckSlider.addEventListener('input', () => {
@@ -105,7 +268,6 @@
       const releaseLabel = document.getElementById('releaseLabel');
 
       function updateDelayLabel() {
-        console.log('delaySlider input value:', delaySlider.value);
         const ms = Number(delaySlider.value);
         switch (ms) {
           case 500:
@@ -130,7 +292,6 @@
             releaseLabel.textContent = 'Normal (1.5s)';
         }
 
-        // keep legacy slider in sync for existing renderer logic
         releaseSlider.value = delaySlider.value;
         releaseSlider.dispatchEvent(new Event('input'));
       }
@@ -140,7 +301,6 @@
       duckLabel.textContent = duckSlider.value + '%';
       delaySlider.dispatchEvent(new Event('input'));
 
-      // Fix 1: + and — buttons
       document.getElementById('duckMinus').addEventListener('click', () => {
         const s = document.getElementById('duckSlider');
         s.value = Math.max(parseInt(s.value) - 5, parseInt(s.min));
@@ -218,7 +378,6 @@
               return;
             }
 
-            // Default selection: first item
             value.textContent = cleanLabel(mics[0].label);
 
             mics.forEach((mic) => {
@@ -266,7 +425,6 @@
         });
 
         if (step === 2) {
-          // Button state is controlled by the global Spotify poll.
           const btn = document.getElementById('toStep3');
           btn.disabled = true;
           btn.textContent = 'Waiting for Spotify...';
@@ -298,7 +456,6 @@
         }
 
         const spotifyFound = spotifyDetected;
-        console.log('[spotify poll] result:', spotifyFound);
 
         const toStep3Btn = document.getElementById('toStep3');
         const spotifyOnboardText = document.getElementById('spotifyOnboardStatus');
